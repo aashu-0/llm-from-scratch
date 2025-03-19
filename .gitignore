@@ -1,0 +1,15 @@
+
+.vscode/
+settings.json
+
+
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.cpython-*.pyc
+
+
+.DS_Store
+.env
+.idea/
