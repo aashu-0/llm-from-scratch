@@ -4,7 +4,6 @@ import torch.nn as nn
 import tiktoken
 from torch.utils.data import Dataset, DataLoader
 
-
 # 1. custom dataset
 class GPTDatasetV1(Dataset):
     def __init__(self, txt, tokenizer, max_length, stride):
