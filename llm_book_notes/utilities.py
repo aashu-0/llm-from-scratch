@@ -1,6 +1,8 @@
 import torch
 import tiktoken
+import torch.nn.functional as F
 from GPT import generate_text_simple
+
 
 # function to text to token_id and token_ids_to_text
 def text_to_token_ids(text, tokenizer):
