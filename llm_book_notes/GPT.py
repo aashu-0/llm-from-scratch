@@ -65,7 +65,7 @@ def generate(model,idx, max_new_tokens, context_size, temp=0.0,
 
         if top_k is not None:
           topk_logits, _= torch.topk(logits, top_k)
-          logits = torch.where(condition=logits < topk_logits.min(),
+          logits = torch.where(condition=logits < topk_logits[:,-1],
                                input=torch.tensor(-float('inf')).to(logits.device),
                                other=logits)
 
