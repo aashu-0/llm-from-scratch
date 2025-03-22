@@ -71,7 +71,7 @@ def generate(model,idx, max_new_tokens, context_size, temp=0.0,
 
         if temp >0.0:
           logits = logits/temp
-          probs = F.softmax(logits, dim=-1)
+          probs = torch.softmax(logits, dim=-1)
           idx_next = torch.multinomial(probs, num_samples=1)
         else:
           idx_next = torch.argmax(logits, dim=-1, keepdim=True)
