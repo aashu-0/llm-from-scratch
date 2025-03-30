@@ -103,6 +103,52 @@ def train_model_simple(model,train_dataloader, val_dataloader, optimizer,
 
     return train_losses, val_losses, track_tokens_seen
 
+
+# TRAINING FUNCTION WITH GRADIENT ACCUMULATION
+def train_model_grad_accum(model, train_dataloader, val_dataloader, optimizer,
+                           device, num_epochs, eval_freq, eval_iter,
+                           start_context, tokenizer, grad_accum_steps=1):
+    train_losses, val_losses, track_tokens_seen = [],[],[]
+    tokens_seen, global_step = 0, -1
+
+    for epoch in range(num_epochs):
+        model.train()
+        accumulated_loss = 0.0
+
+        for step, (input_batch, target_batch) in enumerate(train_dataloader):
+            loss = calc_loss_batch(input_batch, target_batch, model, device)
+            loss = loss / grad_accum_steps
+            loss.backward()
+            accumulated_loss += loss.item()
+            
+            # Perform optimizer step only after accumulating enough gradients
+            if (step + 1) % grad_accum_steps == 0 or step == len(train_dataloader) - 1:
+                optimizer.step()
+                optimizer.zero_grad()
+                global_step += 1
+
+                # Track tokens seen
+                tokens_seen += input_batch.numel()
+
+                # Evaluation step
+                if global_step % eval_freq == 0:
+                    train_loss, val_loss = evaluate_model(model, train_dataloader,
+                                                          val_dataloader, device,
+                                                          eval_iter)
+                    train_losses.append(train_loss)
+                    val_losses.append(val_loss)
+                    track_tokens_seen.append(tokens_seen)
+
+                    print(f'Epoch: {epoch+1} | Step: {global_step:06d}')
+                    print(f'Train Loss: {train_loss:.3f} | Val Loss: {val_loss:.3f}')
+
+
+        # prints a sample text after each epoch
+        generate_and_print_sample(model, tokenizer, device, start_context)
+
+    return train_losses, val_losses, track_tokens_seen
+
+
 # Plot Training and Validation losses 
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
